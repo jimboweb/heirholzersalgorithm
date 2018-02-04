@@ -1,11 +1,9 @@
 package com.jimboweb.heirholzersalgorithm;
 
-import com.sun.javafx.geom.Edge;
+import jdk.internal.util.xml.impl.Input;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class HeirholzersAlgorithm {
 
@@ -15,7 +13,7 @@ public class HeirholzersAlgorithm {
                 try {
                     new HeirholzersAlgorithm().run();
                 } catch (IOException ex) {
-                    Logger.getLogger(HeirholzersAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
+                    System.out.println(ex);
                 }
             }
         }, "1", 1 << 26).start();
@@ -23,6 +21,10 @@ public class HeirholzersAlgorithm {
     public void run() throws IOException {
         Inputter inputter = new ConsoleInput();
         Outputter outputter = new ConsoleOutput();
+        hierholzersAlgorithm(inputter,outputter);
+    }
+
+    public void hierholzersAlgorithm(Inputter inputter, Outputter outputter){
         ArrayList<ArrayList<Integer>> input = inputter.getInput();
         Graph graph = buildGraph(input);
         Path<Integer> path = new Path<>();
@@ -36,6 +38,7 @@ public class HeirholzersAlgorithm {
         } else {
             outputter.output("0");
         }
+
     }
 
     /**
@@ -379,6 +382,7 @@ class Path<V extends Integer> extends ArrayList<V>{
     }
 
 }
+
 interface Inputter{
     public ArrayList<ArrayList<Integer>> getInput();
 }
