@@ -1,10 +1,10 @@
 package com.jimboweb.heirholzersalgorithm;
 
-import jdk.internal.util.xml.impl.Input;
 
 import java.io.IOException;
 import java.util.*;
 
+// FIXME: 2/4/18 algorithm doesn't work for self-loops
 public class HeirholzersAlgorithm {
 
     public static void main(String[] args) {
@@ -31,8 +31,9 @@ public class HeirholzersAlgorithm {
         if(graph.isGraphEven()){
             path = findPath(graph, path);
             String output = "1\n";
-            for(Integer i:path){
-                output += i + " ";
+            for(int i=0;i<path.size()-1;i++){
+                int outputNode = path.get(i) + 1;
+                output += outputNode + " ";
             }
             outputter.output(output);
         } else {
@@ -51,7 +52,7 @@ public class HeirholzersAlgorithm {
         int m = inputs.get(0).get(0);
         Graph<Node> g = new Graph<>();
         for(int i=0;i<n;i++){
-            Node<Integer,ArrayList<Integer>> newNode = new Node(i);
+            Node<Integer,ArrayList<Integer>> newNode = new Node(i,new ArrayList<>(), new ArrayList<>());
             g.addNode(newNode);
         }
         for(int i=1;i<inputs.size();i++){
@@ -161,13 +162,14 @@ public class HeirholzersAlgorithm {
             N currentNode = graph.get(currentVertex.get());
             if(currentNode.hasAdjacent()){
                 Optional<V> nextVertex = currentNode.getFirstAdjacent();
-                currentNode.removeAdjacentVertex(nextVertex.get());
+                currentNode.removeFirstAdjacent();
+                graph.getNode(nextVertex.get()).removeIncomingVertexByVertexNumber(currentNode.getVertex());
                 currentVertex=nextVertex;
             } else {
                 currentVertex = Optional.empty();
             }
         }
-        return path;
+        return newPath;
 
     }
 
@@ -300,6 +302,19 @@ class Node<V extends Integer, A extends List<V>>{
      */
     public boolean hasAdjacent() {
         return !adjacentVertices.isEmpty();
+    }
+
+    public void removeFirstAdjacent(){
+        if(!adjacentVertices.isEmpty()){
+            adjacentVertices.remove(0);
+        }
+    }
+
+    public void removeIncomingVertexByVertexNumber(int vertexNumber){
+        int index = incomingVertices.indexOf(vertexNumber);
+        if(index!=-1){
+            incomingVertices.remove(index);
+        }
     }
 
     /**
