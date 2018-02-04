@@ -1,13 +1,63 @@
 package com.jimboweb.heirholzersalgorithm;
 
+import com.sun.javafx.geom.Edge;
+
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HeirholzersAlgorithm {
 
     public static void main(String[] args) {
-	// write your code here
+        new Thread(null, new Runnable() {
+            public void run() {
+                try {
+                    new HeirholzersAlgorithm().run();
+                } catch (IOException ex) {
+                    Logger.getLogger(HeirholzersAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }, "1", 1 << 26).start();
+    }
+    public void run() throws IOException {
+        Inputter inputter = new ConsoleInput();
+        Outputter outputter = new ConsoleOutput();
+        ArrayList<ArrayList<Integer>> input = inputter.getInput();
+        Graph graph = buildGraph(input);
+        Path<Integer> path = new Path<>();
+        if(graph.isGraphEven()){
+            path = findPath(graph, path);
+            String output = "1\n";
+            for(Integer i:path){
+                output += i + " ";
+            }
+            outputter.output(output);
+        } else {
+            outputter.output("0");
+        }
     }
 
+    /**
+     * creates basic graph from inputs
+     * @param inputs ArrayList of Integers from input
+     * @return
+     */
+    private Graph<Node> buildGraph(ArrayList<ArrayList<Integer>> inputs){
+        int n = inputs.get(0).get(0);
+        int m = inputs.get(0).get(0);
+        Graph<Node> g = new Graph<>();
+        for(int i=0;i<n;i++){
+            Node<Integer,ArrayList<Integer>> newNode = new Node(i);
+            g.addNode(newNode);
+        }
+        for(int i=1;i<inputs.size();i++){
+            int from = inputs.get(i).get(0)-1;
+            int to = inputs.get(i).get(1)-1;
+            g.addEdge(from,to);
+        }
+        return g;
+    }
     /**
      * finds the Eulerian path
      * @param graph contains ArrayList of Nodes
@@ -38,7 +88,7 @@ public class HeirholzersAlgorithm {
      * @param path
      * @param <V> V is an object of type Integer which is a vertex, an index of a node
      * @param <N> N is an object of type Node
-     * @return
+     * @return endpoints of semi-Eulerian graph or open node of Eulerian graph
      */
     public <V extends Integer, N extends Node> Optional<V> findFirstVertex(Graph<N> graph, Path<V> path){
         Optional<V> currentVertex;
@@ -145,6 +195,65 @@ public class HeirholzersAlgorithm {
 }
 
 /**
+ * List of Nodes
+ * @param <N> object of type Node
+ */
+class Graph<N extends Node>  extends ArrayList<N>{
+
+    public Graph(){
+
+    }
+    /**
+     * get Node of index as optional
+     * @param i index to get
+     * @return Node or Optional.empty if it's not there
+     */
+    public Optional<N> getOptional(int i){
+        if (super.isEmpty()){
+            return Optional.empty();
+        } else {
+            return Optional.of(super.get(i));
+        }
+    }
+
+    public void addNode(N n){
+        this.add(n);
+    }
+
+    public N getNode(int i){
+        return get(i);
+    }
+
+    @Override
+    public Iterator<N> iterator() {
+        return super.iterator();
+    }
+    public <N extends Node, V extends Integer> Path<V> oddVertices(){
+        Path<V> rtrn = new Path<>();
+        Iterator<N> graphIterator = (Iterator<N>)iterator();
+        while (graphIterator.hasNext()){
+            N n = graphIterator.next();
+            if(!n.isEven()){
+                rtrn.add((V)n.getVertex());
+            }
+        }
+        return rtrn;
+    }
+
+    public <V extends Integer> boolean isGraphEven(){
+        Path<V> oddVertices = oddVertices();
+        return oddVertices.isEmpty();
+    }
+
+    public void addEdge(int from, int to){
+        getNode(from).addAdjacentVertex(to);
+        getNode(to).addIncomingVertex(from);
+
+    }
+
+}
+
+/**
  * A directed node
  * @param <V> V is an object of type Integer which is a vertex, an index of a node
  * @param <A> A is a list of adjacent vertices coming in or out
@@ -222,6 +331,14 @@ class Node<V extends Integer, A extends List<V>>{
         adjacentVertices.remove(i);
     }
 
+    public void addAdjacentVertex(V i){
+        adjacentVertices.add(i);
+    }
+
+    public void addIncomingVertex(V i){
+        incomingVertices.add(i);
+    }
+
     /**
      *
      * @return true if in==out, false if not
@@ -229,51 +346,6 @@ class Node<V extends Integer, A extends List<V>>{
     public boolean isEven(){
         return incomingVertices.size()==adjacentVertices.size();
     }
-}
-
-/**
- * List of Nodes
- * @param <N> object of type Node
- */
-class Graph<N extends Node>  extends ArrayList<N>{
-    /**
-     * get Node of index as optional
-     * @param i index to get
-     * @return Node or Optional.empty if it's not there
-     */
-    public Optional<N> getOptional(int i){
-        if (super.isEmpty()){
-            return Optional.empty();
-        } else {
-            return Optional.of(super.get(i));
-        }
-    }
-
-    @Override
-    public Iterator<N> iterator() {
-        return super.iterator();
-    }
-    public <N extends Node, V extends Integer> Path<V> oddVertices(){
-        Path<V> rtrn = new Path<>();
-        Iterator<N> graphIterator = (Iterator<N>)iterator();
-        while (graphIterator.hasNext()){
-            N n = graphIterator.next();
-            if(!n.isEven()){
-                rtrn.add((V)n.getVertex());
-            }
-        }
-        return rtrn;
-    }
-
-    private <N extends Node, V extends Integer> ArrayList<V> semiEulerianVertices(){
-        ArrayList<V> oddVertices = oddVertices();
-        if(oddVertices.size()==2){
-            return oddVertices;
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
 }
 
 /**
@@ -306,4 +378,41 @@ class Path<V extends Integer> extends ArrayList<V>{
         }
     }
 
+}
+interface Inputter{
+    public ArrayList<ArrayList<Integer>> getInput();
+}
+
+class ConsoleInput implements Inputter {
+    public ArrayList<ArrayList<Integer>> getInput(){
+        Scanner scanner = new Scanner(System.in);
+        ArrayList<ArrayList<Integer>> inputs = new ArrayList<>();
+        ArrayList<Integer> in = new ArrayList<>();
+        in.add(scanner.nextInt());
+        in.add(scanner.nextInt());
+        if (in.get(0) == 0 || in.get(1) == 0) {
+            System.out.println("0");
+            System.exit(0);
+        }
+        inputs.add(in);
+        for (int i = 0; i < inputs.get(0).get(1); i++) {
+            in = new ArrayList<>();
+            in.add(scanner.nextInt());
+            in.add(scanner.nextInt());
+            inputs.add(in);
+        }
+        return inputs;
+    }
+}
+
+interface Outputter{
+    public void output(String output);
+}
+
+class ConsoleOutput implements Outputter{
+
+    @Override
+    public void output(String outPut) {
+        System.out.println(outPut);
+    }
 }
