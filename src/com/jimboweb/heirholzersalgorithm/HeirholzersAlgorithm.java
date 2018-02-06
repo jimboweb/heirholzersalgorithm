@@ -4,7 +4,7 @@ package com.jimboweb.heirholzersalgorithm;
 import java.io.IOException;
 import java.util.*;
 
-// FIXME: 2/4/18 algorithm doesn't work for self-loops
+
 public class HeirholzersAlgorithm {
 
     public static void main(String[] args) {
@@ -58,7 +58,11 @@ public class HeirholzersAlgorithm {
         for(int i=1;i<inputs.size();i++){
             int from = inputs.get(i).get(0)-1;
             int to = inputs.get(i).get(1)-1;
-            g.addEdge(from,to);
+            if(from==to){
+                g.addSelfLoop(from);
+            }else {
+                g.addEdge(from, to);
+            }
         }
         return g;
     }
@@ -158,12 +162,17 @@ public class HeirholzersAlgorithm {
     public <V extends Integer, N extends Node> Path<V> makeNewPath(Graph<N> graph, Path<V> path, Optional<V> currentVertex){
         Path<V> newPath = new Path<>();
         while(currentVertex.isPresent()){
-            newPath.add(currentVertex.get());
-            N currentNode = graph.get(currentVertex.get());
+            V currentVertexNum = currentVertex.get();
+            newPath.add(currentVertexNum);
+            N currentNode = graph.get(currentVertexNum);
+            while(currentNode.hasSelfLoops()){
+                newPath.add(currentVertexNum);
+                graph.removeSelfLoop(currentVertexNum);
+            }
             if(currentNode.hasAdjacent()){
                 Optional<V> nextVertex = currentNode.getFirstAdjacent();
                 currentNode.removeFirstAdjacent();
-                graph.getNode(nextVertex.get()).removeIncomingVertexByVertexNumber(currentNode.getVertex());
+                graph.getNode(nextVertex.orElseThrow(EmptyStackException::new)).removeIncomingVertexByVertexNumber(currentNode.getVertex());
                 currentVertex=nextVertex;
             } else {
                 currentVertex = Optional.empty();
@@ -221,6 +230,14 @@ class Graph<N extends Node>  extends ArrayList<N>{
         }
     }
 
+    public void addSelfLoop(int n){
+        getNode(n).addSelfLoop();
+    }
+
+    public void removeSelfLoop(int n){
+        getNode(n).removeSelfLoop();
+    }
+
     public void addNode(N n){
         this.add(n);
     }
@@ -267,7 +284,7 @@ class Node<V extends Integer, A extends List<V>>{
     private final V vertex;
     private A adjacentVertices;
     private A incomingVertices;
-
+    private int selfLoops = 0;
     /**
      *
      * @param vertex the number of the vertex
@@ -286,6 +303,18 @@ class Node<V extends Integer, A extends List<V>>{
      */
     public Node(V vertex){
         this.vertex = vertex;
+    }
+
+    public boolean hasSelfLoops(){
+        return selfLoops>0;
+    }
+
+    public void addSelfLoop(){
+        selfLoops++;
+    }
+
+    public void removeSelfLoop(){
+        selfLoops--;
     }
 
     /**
