@@ -357,11 +357,21 @@ public class HeirholzersAlgorithmTest {
 
         //TODO: make sure each node's out goes to next node's to
         Integer resultFrom = nodeList.get(0);
+        int firstNode = resultFrom;
         Integer resultTo;
+        InputNode testFrom = g.nodes.stream().filter(n->n.index==firstNode).findFirst().orElse(new InputNode(-1));
+        if(testFrom.index!=resultFrom){
+            fail("first node not in graph");
+        }
         for(int i=1;i<nodeList.size();i++){
             resultFrom = nodeList.get(i);
-
             resultTo = nodeList.get(i%nodeList.size());
+            int resultToFinal = resultTo;
+            int testTo = testFrom.edgesOut.stream().filter(e->g.edges.get(e).toNode==resultToFinal).findFirst().get();
+            if (testTo!=resultTo){
+                // TODO: 2/7/18 fail message 
+                fail();
+            }
         }
         //TODO: make sure that the cycle has all the edges
 
