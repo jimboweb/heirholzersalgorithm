@@ -353,9 +353,17 @@ public class HeirholzersAlgorithmTest {
                 System.out.println(ex);
             }
         }
-        //TODO: make sure that the cycle has all the nodes
+        boolean[] edgeIsUsed = new boolean[g.edges.size()];
 
         //TODO: make sure each node's out goes to next node's to
+        Integer resultFrom = nodeList.get(0);
+        Integer resultTo;
+        for(int i=1;i<nodeList.size();i++){
+            resultFrom = nodeList.get(i);
+
+            resultTo = nodeList.get(i%nodeList.size());
+        }
+        //TODO: make sure that the cycle has all the edges
 
         //TODO: make sure all edges were used
 
