@@ -1,21 +1,21 @@
 package com.jimboweb.heirholzersalgorithm;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Optional;
-import java.util.Random;
+import org.junit.Test;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
 public class HeirholzersAlgorithmTest {
     Random rnd = new Random();
 
-    @org.junit.Test
-    public void hierholzersAlgorithm() {
+    @Test
+    public void testHierholzersAlgorithm() {
         int graphSize = rnd.nextInt(10);
         InputGraph g = makeBalancedInputGraph(graphSize);
         String input = createInput(g);
-        TestInput inputter = new TestInput();
+        TestInput inputter = new TestInput(input);
         TestOutput outputter = new TestOutput();
         HeirholzersAlgorithm h = new HeirholzersAlgorithm();
         h.hierholzersAlgorithm(inputter,outputter);
@@ -37,20 +37,32 @@ public class HeirholzersAlgorithmTest {
     private String createInput(InputGraph g){
         String rtrn = g.nodes.size() + " " + g.edges.size() + "\n";
         for(InputEdge edge:g.edges){
-            rtrn += edge.fromNode + " " + edge.toNode + "\n";
+            int f = edge.fromNode+1;
+            int t = edge.toNode+1;
+            rtrn += f + " " + t + "\n";
         }
         return rtrn;
     }
 
     class TestInput implements Inputter{
         private String input;
-        public TestInput(){
-
+        public TestInput(String input){
+            this.input = input;
         }
         @Override
         public ArrayList<ArrayList<Integer>> getInput() {
+            System.out.println(("input:\n" + input));
+            ArrayList<ArrayList<Integer>> rtrn = new ArrayList<>();
+            for(String inputLine:input.split("\n")){
 
-            return null;
+                ArrayList<Integer> nextLine =
+                        (ArrayList<Integer>)Arrays.stream(inputLine.split(" "))
+                                .map(Integer::valueOf)
+                                .collect(Collectors.toList());
+                rtrn.add(nextLine);
+            }
+
+            return rtrn;
         }
     }
 
@@ -355,22 +367,26 @@ public class HeirholzersAlgorithmTest {
      * @param g the original input graph
      * @return true if cycle is Eulerian in InputGraph g
      */
-    private boolean testEulerianCycle(String output, InputGraph g, String input){
-        String[] nodeListAsString = output.split(" ");
+    private void testEulerianCycle(String output, InputGraph g, String input){
+        if(output.split("\n")[0]=="0"){
+            fail("Eulerian path marked as not Eulearian");
+        }
+        String[] nodeListAsString = output.split(" ")[1].split(" ");
         ArrayList<Integer> nodeList = new ArrayList<>();
         for (String s:nodeListAsString){
             try{
-                nodeList.add(Integer.parseInt(s));
+                nodeList.add(Integer.parseInt(s)-1);
             } catch (NumberFormatException ex) {
                 System.out.println(ex);
             }
         }
         boolean[] edgeIsUsed = new boolean[g.edges.size()];
 
-        //TODO: make sure each node's out goes to next node's to
+
         Integer resultFrom = nodeList.get(0);
         int firstNode = resultFrom;
         Integer resultTo;
+        // FIXME: 2/10/18 first node not marked used.
         InputNode testFrom = g.nodes.stream().filter(n->n.index==firstNode).findFirst().orElse(new InputNode(-1));
         if(testFrom.index!=resultFrom){
             fail("first node not in graph");
@@ -390,13 +406,22 @@ public class HeirholzersAlgorithmTest {
             int fromFinal = resultFrom;
             int toFinal = resultTo;
             Optional<InputEdge> nextEdge = g.edges.stream().filter(edge->edge.fromNode == fromFinal && edge.toNode == toFinal).findFirst();
-            // TODO: 2/9/18 mark edge used 
+            if(!nextEdge.isPresent()){
+                fail("edge from " + fromFinal + " to " + toFinal + " does not exist");
+            }
+            edgeIsUsed[nextEdge.get().index] = true;
         }
-        //TODO: make sure that the cycle has all the edges
+        for(int i=0;i<edgeIsUsed.length;i++){
+            boolean edgeUsed = edgeIsUsed[i];
+            if(!edgeUsed){
+                fail("edge " + i + " not used");
+            }
+        }
 
-        //TODO: make sure all edges were used
 
-        return true;
+
+
+        System.out.println("Test passed");
     }
 
     private static int triangular(int n){
