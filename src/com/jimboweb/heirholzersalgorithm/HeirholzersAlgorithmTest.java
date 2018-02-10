@@ -2,6 +2,7 @@ package com.jimboweb.heirholzersalgorithm;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Optional;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -13,6 +14,12 @@ public class HeirholzersAlgorithmTest {
     public void hierholzersAlgorithm() {
         int graphSize = rnd.nextInt(10);
         InputGraph g = makeBalancedInputGraph(graphSize);
+        String input = createInput(g);
+        TestInput inputter = new TestInput();
+        TestOutput outputter = new TestOutput();
+        HeirholzersAlgorithm h = new HeirholzersAlgorithm();
+        h.hierholzersAlgorithm(inputter,outputter);
+        testEulerianCycle(outputter.getOutputText(),g,inputter.input);
     }
 
     @org.junit.Test
@@ -28,15 +35,21 @@ public class HeirholzersAlgorithmTest {
     }
 
     private String createInput(InputGraph g){
-        // TODO: 2/4/18 turn graph into input
-        return "";
+        String rtrn = g.nodes.size() + " " + g.edges.size() + "\n";
+        for(InputEdge edge:g.edges){
+            rtrn += edge.fromNode + " " + edge.toNode + "\n";
+        }
+        return rtrn;
     }
 
     class TestInput implements Inputter{
+        private String input;
+        public TestInput(){
 
+        }
         @Override
         public ArrayList<ArrayList<Integer>> getInput() {
-            // TODO: 2/4/18 generate input
+
             return null;
         }
     }
@@ -331,7 +344,6 @@ public class HeirholzersAlgorithmTest {
         return gr;
     }
 
-    // TODO: 2/4/18 modify this to work with output string
     /**
      * <o>Checks to make sure that the cycle meets following criteria:</p>
      * <ol>
@@ -343,7 +355,7 @@ public class HeirholzersAlgorithmTest {
      * @param g the original input graph
      * @return true if cycle is Eulerian in InputGraph g
      */
-    private boolean testEulerianCycle(String output, InputGraph g){
+    private boolean testEulerianCycle(String output, InputGraph g, String input){
         String[] nodeListAsString = output.split(" ");
         ArrayList<Integer> nodeList = new ArrayList<>();
         for (String s:nodeListAsString){
@@ -367,11 +379,18 @@ public class HeirholzersAlgorithmTest {
             resultFrom = nodeList.get(i);
             resultTo = nodeList.get(i%nodeList.size());
             int resultToFinal = resultTo;
-            int testTo = testFrom.edgesOut.stream().filter(e->g.edges.get(e).toNode==resultToFinal).findFirst().get();
-            if (testTo!=resultTo){
-                // TODO: 2/7/18 fail message 
-                fail();
+            Optional<Integer> testTo = testFrom.edgesOut.stream().filter(e->g.edges.get(e).toNode==resultToFinal).findFirst();
+            if (!testTo.isPresent() || testTo.get()!=resultTo){
+                String failString = "Incorrect path at " + i + ". Node " + resultToFinal +
+                        " does not connect from node " + resultFrom;
+                failString += "output was " + output;
+                failString += "input was " + input;
+                fail(failString);
             }
+            int fromFinal = resultFrom;
+            int toFinal = resultTo;
+            Optional<InputEdge> nextEdge = g.edges.stream().filter(edge->edge.fromNode == fromFinal && edge.toNode == toFinal).findFirst();
+            // TODO: 2/9/18 mark edge used 
         }
         //TODO: make sure that the cycle has all the edges
 
