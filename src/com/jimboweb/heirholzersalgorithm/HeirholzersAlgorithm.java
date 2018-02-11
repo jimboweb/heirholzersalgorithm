@@ -123,7 +123,7 @@ public class HeirholzersAlgorithm {
         while (graphIterator.hasNext()){
             N n = graphIterator.next();
             if(n.hasAdjacent()){
-                if(path.isEmpty()||path.contains(n)){
+                if(path.isEmpty()||path.contains((V)n.getVertex())){
                     currentVertex = Optional.of((V)n.getVertex());
                 }
             }
@@ -192,9 +192,10 @@ public class HeirholzersAlgorithm {
     private <V extends Integer> Path<V> addNewPath(Path<V> path, Path<V> newPath) {
         Path<V> adjustedPath = new Path<>();
         boolean newPathNotAdded = true;
+        Integer start = newPath.getStart().orElseThrow(NullPointerException::new);
         for(V vertex:path){
             adjustedPath.add(vertex);
-            if(newPathNotAdded && vertex.equals(newPath.getStart())){
+            if(newPathNotAdded && vertex.equals(start)){
                 for(V newVertex:newPath){
                     adjustedPath.add(newVertex);
                 }

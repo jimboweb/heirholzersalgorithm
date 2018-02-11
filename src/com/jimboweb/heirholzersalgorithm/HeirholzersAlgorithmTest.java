@@ -386,11 +386,11 @@ public class HeirholzersAlgorithmTest {
         Integer resultFrom = nodeList.get(0);
         int firstNode = resultFrom;
         Integer resultTo;
-        // FIXME: 2/10/18 first node not marked used.
         InputNode testFrom = g.nodes.stream().filter(n->n.index==firstNode).findFirst().orElse(new InputNode(-1));
         if(testFrom.index!=resultFrom){
             fail("first node not in graph");
         }
+        edgeIsUsed[testFrom.index] = true;
         for(int i=1;i<nodeList.size();i++){
             resultFrom = nodeList.get(i);
             resultTo = nodeList.get(i%nodeList.size());
