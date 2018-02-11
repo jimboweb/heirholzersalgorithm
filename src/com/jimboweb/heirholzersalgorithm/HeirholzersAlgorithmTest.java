@@ -12,7 +12,7 @@ public class HeirholzersAlgorithmTest {
 
     @Test
     public void testHierholzersAlgorithm() {
-        int graphSize = rnd.nextInt(10);
+        int graphSize = rnd.nextInt(6);
         InputGraph g = makeBalancedInputGraph(graphSize);
         String input = createInput(g);
         TestInput inputter = new TestInput(input);
@@ -371,7 +371,7 @@ public class HeirholzersAlgorithmTest {
         if(output.split("\n")[0]=="0"){
             fail("Eulerian path marked as not Eulearian");
         }
-        String[] nodeListAsString = output.split(" ")[1].split(" ");
+        String[] nodeListAsString = output.split("\n")[1].split(" ");
         ArrayList<Integer> nodeList = new ArrayList<>();
         for (String s:nodeListAsString){
             try{
@@ -390,7 +390,6 @@ public class HeirholzersAlgorithmTest {
         if(testFrom.index!=resultFrom){
             fail("first node not in graph");
         }
-        edgeIsUsed[testFrom.index] = true;
         for(int i=1;i<nodeList.size();i++){
             resultFrom = nodeList.get(i);
             resultTo = nodeList.get(i%nodeList.size());

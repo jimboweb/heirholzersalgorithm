@@ -1,4 +1,4 @@
-package com.jimboweb.heirholzersalgorithm;
+package com.jimboweb.heirholzersalgorithm; //comment out to turn in on Coursera
 
 
 import java.io.IOException;
@@ -196,7 +196,8 @@ public class HeirholzersAlgorithm {
         for(V vertex:path){
             adjustedPath.add(vertex);
             if(newPathNotAdded && vertex.equals(start)){
-                for(V newVertex:newPath){
+                for(int j=1;j<newPath.size();j++){
+                    V newVertex = newPath.get(j);
                     adjustedPath.add(newVertex);
                 }
                 newPathNotAdded = false;
