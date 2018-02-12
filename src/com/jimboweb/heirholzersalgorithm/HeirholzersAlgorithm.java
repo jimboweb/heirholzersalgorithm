@@ -1,5 +1,7 @@
 package com.jimboweb.heirholzersalgorithm; //comment out to turn in on Coursera
 
+// TODO: 2/11/18 AllStrippedDown branch: get rid of all the optionals and generics to speed it up.
+// TODO: 2/12/18 but first try getting rid of the .contains
 
 import java.io.IOException;
 import java.util.*;
@@ -27,7 +29,7 @@ public class HeirholzersAlgorithm {
     public void hierholzersAlgorithm(Inputter inputter, Outputter outputter){
         ArrayList<ArrayList<Integer>> input = inputter.getInput();
         Graph graph = buildGraph(input);
-        Path<Integer> path = new Path<>();
+        Path<Integer> path = new Path<>(graph.size());
         if(graph.isGraphEven()){
             path = findPath(graph, path);
             String output = "1\n";
@@ -100,7 +102,7 @@ public class HeirholzersAlgorithm {
      */
     public <V extends Integer, N extends Node> Optional<V> findFirstVertex(Graph<N> graph, Path<V> path){
         Optional<V> currentVertex;
-        ArrayList<V> oddVertices = graph.oddVertices();
+        ArrayList<V> oddVertices = graph.oddVertices(graph.size());
         if (oddVertices.size()==2){
             currentVertex = firstVertexIfSemiEulerian(path, oddVertices);
         } else {
@@ -123,7 +125,7 @@ public class HeirholzersAlgorithm {
         while (graphIterator.hasNext()){
             N n = graphIterator.next();
             if(n.hasAdjacent()){
-                if(path.isEmpty()||path.contains((V)n.getVertex())){
+                if(path.isEmpty()||path.doesContain((V)n.getVertex())){
                     currentVertex = Optional.of((V)n.getVertex());
                 }
             }
@@ -142,9 +144,9 @@ public class HeirholzersAlgorithm {
         Optional<V> currentVertex = Optional.empty();
         Optional<V> firstEndpoint = Optional.of(endPoints.get(0));
         Optional<V> secondEndpoint = Optional.of(endPoints.get(1));
-        if(path.isEmpty() || path.contains(firstEndpoint)){
+        if(path.isEmpty() || path.doesContain(firstEndpoint.get())){
             currentVertex=firstEndpoint;
-        } else if(path.contains(secondEndpoint)){
+        } else if(path.doesContain(secondEndpoint.get())){
             currentVertex = secondEndpoint;
         }
         return currentVertex;
@@ -160,7 +162,7 @@ public class HeirholzersAlgorithm {
      * @return the new path from a vertex of the old one
      */
     public <V extends Integer, N extends Node> Path<V> makeNewPath(Graph<N> graph, Path<V> path, Optional<V> currentVertex){
-        Path<V> newPath = new Path<>();
+        Path<V> newPath = new Path<V>(graph.size());
         while(currentVertex.isPresent()){
             V currentVertexNum = currentVertex.get();
             newPath.add(currentVertexNum);
@@ -190,7 +192,7 @@ public class HeirholzersAlgorithm {
      * @return the previous path joined to new path
      */
     private <V extends Integer> Path<V> addNewPath(Path<V> path, Path<V> newPath) {
-        Path<V> adjustedPath = new Path<>();
+        Path<V> adjustedPath = new Path<>(path.getGraphSize());
         boolean newPathNotAdded = true;
         Integer start = newPath.getStart().orElseThrow(NullPointerException::new);
         for(V vertex:path){
@@ -252,8 +254,8 @@ class Graph<N extends Node>  extends ArrayList<N>{
     public Iterator<N> iterator() {
         return super.iterator();
     }
-    public <N extends Node, V extends Integer> Path<V> oddVertices(){
-        Path<V> rtrn = new Path<>();
+    public <N extends Node, V extends Integer> Path<V> oddVertices(int graphSize){
+        Path<V> rtrn = new Path<>(graphSize);
         Iterator<N> graphIterator = (Iterator<N>)iterator();
         while (graphIterator.hasNext()){
             N n = graphIterator.next();
@@ -265,7 +267,7 @@ class Graph<N extends Node>  extends ArrayList<N>{
     }
 
     public <V extends Integer> boolean isGraphEven(){
-        Path<V> oddVertices = oddVertices();
+        Path<V> oddVertices = oddVertices(0); //graph size doesn't matter here
         return oddVertices.isEmpty();
     }
 
@@ -402,6 +404,36 @@ class Node<V extends Integer, A extends List<V>>{
  * @param <V> V is an object of type Integer which is a vertex, an index of a node
  */
 class Path<V extends Integer> extends ArrayList<V>{
+    private boolean[] doesContain;
+    private V val;
+
+    @Override
+    public boolean add(V val){
+        boolean rtrn = super.add(val);
+        int valInt = (int)val;
+        if(valInt>doesContain.length){
+            throw new IndexOutOfBoundsException("contains array is not big enough for " + val);
+        }
+        if(rtrn){
+            doesContain[valInt] = true;
+        }
+        return rtrn;
+    }
+
+
+    public boolean doesContain(V val){
+        int valInt = (int)val;
+        return doesContain[valInt];
+    }
+
+    public Path(V size) {
+        doesContain = new boolean[size];
+    }
+
+    public Path(int size) {
+        doesContain = new boolean[size];
+    }
+
     /**
      * get vertex as optional integer
      * @param i index to get
@@ -425,6 +457,10 @@ class Path<V extends Integer> extends ArrayList<V>{
         } else {
             return Optional.of(super.get(0));
         }
+    }
+
+    public int getGraphSize(){
+        return doesContain.length;
     }
 
 }
