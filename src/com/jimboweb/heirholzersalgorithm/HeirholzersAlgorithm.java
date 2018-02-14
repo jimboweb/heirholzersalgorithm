@@ -1,4 +1,4 @@
-package com.jimboweb.heirholzersalgorithm;
+//package com.jimboweb.heirholzersalgorithm;
 
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class HeirholzersAlgorithm {
      */
     public Path findPath(Graph graph, Path path){
         Integer currentVertex = findFirstVertex(graph, path);
-        if(currentVertex!=null){
+        if(currentVertex==null){
             return path;
         }
         Path newPath = makeNewPath(graph,path,currentVertex);
