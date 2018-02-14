@@ -213,13 +213,6 @@ class Graph  extends ArrayList<Node>{
      * @param i index to get
      * @return Node or Optional.empty if it's not there
      */
-    public Optional<Node> getOptional(int i){
-        if (super.isEmpty()){
-            return null;
-        } else {
-            return Optional.of(super.get(i));
-        }
-    }
 
     public void addSelfLoop(int n){
         getNode(n).addSelfLoop();
