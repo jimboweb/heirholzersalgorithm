@@ -1,7 +1,6 @@
-package com.jimboweb.heirholzersalgorithm; //comment out to turn in on Coursera
+package com.jimboweb.heirholzersalgorithm;
 
 // TODO: 2/11/18 AllStrippedDown branch: get rid of all the optionals and generics to speed it up.
-// TODO: 2/12/18 but first try getting rid of the .contains
 
 import java.io.IOException;
 import java.util.*;
@@ -30,7 +29,7 @@ public class HeirholzersAlgorithm {
         ArrayList<ArrayList<Integer>> input = inputter.getInput();
         Graph graph = buildGraph(input);
         Path<Integer> path = new Path<>(graph.size());
-        if(graph.isGraphEven()){
+        if(graph.isGraphEven(graph.size())){
             path = findPath(graph, path);
             String output = "1\n";
             for(int i=0;i<path.size()-1;i++){
@@ -266,8 +265,8 @@ class Graph<N extends Node>  extends ArrayList<N>{
         return rtrn;
     }
 
-    public <V extends Integer> boolean isGraphEven(){
-        Path<V> oddVertices = oddVertices(0); //graph size doesn't matter here
+    public <V extends Integer> boolean isGraphEven(int graphSize){
+        Path<V> oddVertices = oddVertices(graphSize); //graph size doesn't matter here
         return oddVertices.isEmpty();
     }
 
