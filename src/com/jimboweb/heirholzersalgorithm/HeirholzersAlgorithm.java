@@ -158,6 +158,7 @@ public class HeirholzersAlgorithm {
      * @return the new path from a vertex of the old one
      */
     public  Path makeNewPath(Graph graph, Path path, Integer currentVertex){
+        // TODO: 2/16/18
         Path newPath = new Path(graph.size());
         while(currentVertex!=null){
             Integer currentVertexNum = currentVertex;
@@ -169,6 +170,9 @@ public class HeirholzersAlgorithm {
             }
             if(currentNode.hasAdjacent()){
                 Integer nextVertex = currentNode.getFirstAdjacent();
+                // TODO: 2/16/18 for first and last vertices check for oddVertices
+                // probably first vertex can be something like an isFirstVertex boolean
+                // and the last vertex can be found by checking if nextVertex has adjacent
                 currentNode.removeFirstAdjacent();
                 graph.getNode(nextVertex).removeIncomingVertexByVertexNumber(currentNode.getVertex());
                 currentVertex=nextVertex;
@@ -217,7 +221,7 @@ class Graph  extends ArrayList<Node>{
     }
     /**
      * get Node of index as optional
-     * @param i index to get
+     * @param n index to get
      * @return Node or Optional.empty if it's not there
      */
 
@@ -324,6 +328,7 @@ class Node {
         return !adjacentVertices.isEmpty();
     }
 
+    // TODO: 2/16/18 change these to to have a updateOddVertices boolean to change the oddVertices data structures
     public void removeFirstAdjacent(){
         if(!adjacentVertices.isEmpty()){
             adjacentVertices.remove(0);
