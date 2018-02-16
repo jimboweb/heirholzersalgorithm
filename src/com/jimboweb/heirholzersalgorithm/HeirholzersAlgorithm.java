@@ -4,6 +4,13 @@ package com.jimboweb.heirholzersalgorithm;
 import java.io.IOException;
 import java.util.*;
 
+// TODO: 2/16/18 get rid of the oddVertices loop.
+// 0) give the Graph object an oddVertices list of vertex indices
+// 1) give the Node object a boolean isOdd property
+// 2) replace the incomingEdges list with a simple incomingEdges int count variable
+// 3) set the isOdd and oddVertices array at beginning of program
+// 4) change the removeEdge method so it changes the isOdd, incomingVertices count and oddEdges list
+// but only IF it's not removing another edge right after
 
 public class HeirholzersAlgorithm {
 
@@ -234,6 +241,8 @@ class Graph  extends ArrayList<Node>{
     public Iterator<Node> iterator() {
         return super.iterator();
     }
+
+    // TODO: 2/16/18 We can get rid of this loop. It's worsening the efficiency by a factor of O(n)
     public  Path oddVertices(int graphSize){
         Path rtrn = new Path(graphSize);
         Iterator<Node> graphIterator = (Iterator<Node>)iterator();
