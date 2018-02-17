@@ -5,12 +5,6 @@ import java.io.IOException;
 import java.util.*;
 
 // TODO: 2/16/18 get rid of the oddVertices loop.
-// 0) give the Graph object an oddVertices list of vertex indices
-// 1) give the Node object a boolean isOdd property
-// 2) replace the incomingEdges list with a simple incomingEdges int count variable
-// 3) set the isOdd and oddVertices array at beginning of program
-// 4) change the removeEdge method so it changes the isOdd, incomingVertices count and oddEdges list
-// but only IF it's not removing another edge right after
 
 public class HeirholzersAlgorithm {
 
@@ -59,7 +53,7 @@ public class HeirholzersAlgorithm {
         int m = inputs.get(0).get(0);
         Graph g = new Graph();
         for(int i=0;i<n;i++){
-            Node newNode = new Node(i,new ArrayList<>(), new ArrayList<>());
+            Node newNode = new Node(i,new ArrayList<>(), new ArrayList<>(), g);
             g.addNode(newNode);
         }
         for(int i=1;i<inputs.size();i++){
@@ -70,6 +64,9 @@ public class HeirholzersAlgorithm {
             }else {
                 g.addEdge(from, to);
             }
+        }
+        for(Node node:g){
+            node.updateOdd();
         }
         return g;
     }
@@ -103,8 +100,8 @@ public class HeirholzersAlgorithm {
      */
     public Integer findFirstVertex(Graph graph, Path path){
         Integer currentVertex;
-        ArrayList<Integer> oddVertices = graph.oddVertices(graph.size());
-        if (oddVertices.size()==2){
+        Integer[] oddVertices = graph.getOddVertices();
+        if (graph.isSemiEulerian()){
             currentVertex = firstVertexIfSemiEulerian(path, oddVertices);
         } else {
             currentVertex = firstVertexIfEulerian(graph,path);
@@ -138,10 +135,10 @@ public class HeirholzersAlgorithm {
      * @param endPoints end points of semi Eulerian graph
      * @return
      */
-    private  Integer firstVertexIfSemiEulerian(Path path, ArrayList<Integer> endPoints) {
+    private  Integer firstVertexIfSemiEulerian(Path path, Integer[] endPoints) {
         Integer currentVertex = null;
-        Integer firstEndpoint = endPoints.get(0);
-        Integer secondEndpoint = endPoints.get(1);
+        Integer firstEndpoint = endPoints[0];
+        Integer secondEndpoint = endPoints[1];
         if(path.isEmpty() || path.doesContain(firstEndpoint)){
             currentVertex=firstEndpoint;
         } else if(path.doesContain(secondEndpoint)){
@@ -158,7 +155,6 @@ public class HeirholzersAlgorithm {
      * @return the new path from a vertex of the old one
      */
     public  Path makeNewPath(Graph graph, Path path, Integer currentVertex){
-        // TODO: 2/16/18
         Path newPath = new Path(graph.size());
         while(currentVertex!=null){
             Integer currentVertexNum = currentVertex;
@@ -168,14 +164,20 @@ public class HeirholzersAlgorithm {
                 newPath.add(currentVertexNum);
                 graph.removeSelfLoop(currentVertexNum);
             }
+            boolean isFirstLoop = true;
             if(currentNode.hasAdjacent()){
                 Integer nextVertex = currentNode.getFirstAdjacent();
-                // TODO: 2/16/18 for first and last vertices check for oddVertices
-                // probably first vertex can be something like an isFirstVertex boolean
-                // and the last vertex can be found by checking if nextVertex has adjacent
                 currentNode.removeFirstAdjacent();
-                graph.getNode(nextVertex).removeIncomingVertexByVertexNumber(currentNode.getVertex());
+                //this should only update at the beginning and end of path
+                //which should be the only place I can get an odd vertex
+                //but we'll ee
+                if(isFirstLoop || !currentNode.hasAdjacent()){
+                    currentNode.updateOdd();
+                }
+                graph.getNode(nextVertex).removeIncomingVertex();
                 currentVertex=nextVertex;
+
+                isFirstLoop = false;
             } else {
                 currentVertex = null;
             }
@@ -216,14 +218,35 @@ public class HeirholzersAlgorithm {
   */
 class Graph  extends ArrayList<Node>{
 
+    Set<Integer> oddVertices;
     public Graph(){
-
+        oddVertices = new HashSet<>();
     }
     /**
      * get Node of index as optional
      * @param n index to get
      * @return Node or Optional.empty if it's not there
      */
+
+    public void addOddVertex(int n){
+        oddVertices.add(n);
+    }
+
+    public void removeOddVertex(int n){
+        oddVertices.remove(n);
+    }
+
+    public boolean isEulerian(){
+        return oddVertices.size()==0;
+    }
+
+    public boolean isSemiEulerian(){
+        return oddVertices.size()==2;
+    }
+
+    public Integer[] getOddVertices(){
+        return (Integer[])oddVertices.toArray();
+    }
 
     public void addSelfLoop(int n){
         getNode(n).addSelfLoop();
@@ -246,21 +269,8 @@ class Graph  extends ArrayList<Node>{
         return super.iterator();
     }
 
-    // TODO: 2/16/18 We can get rid of this loop. It's worsening the efficiency by a factor of O(n)
-    public  Path oddVertices(int graphSize){
-        Path rtrn = new Path(graphSize);
-        Iterator<Node> graphIterator = (Iterator<Node>)iterator();
-        while (graphIterator.hasNext()){
-            Node n = graphIterator.next();
-            if(!n.isEven()){
-                rtrn.add((Integer)n.getVertex());
-            }
-        }
-        return rtrn;
-    }
 
     public boolean isGraphEven(int graphSize){
-        Path oddVertices = oddVertices(graphSize); //graph size doesn't matter here
         return oddVertices.isEmpty();
     }
 
@@ -278,18 +288,33 @@ class Graph  extends ArrayList<Node>{
 class Node {
     private final Integer vertex;
     private List<Integer> adjacentVertices;
-    private List<Integer> incomingVertices;
+    private int incomingVertices;
     private int selfLoops = 0;
+    private boolean isOdd;
+    private Graph gr;
     /**
      *
      * @param vertex the number of the vertex
      * @param vertices adjacent vertices
      * @param incomingVertices incoming vertices
      */
-    public Node(Integer vertex, List<Integer> vertices, List<Integer> incomingVertices) {
+    public Node(Integer vertex, List<Integer> vertices, List<Integer> incomingVertices, Graph gr) {
         this.vertex = vertex;
         this.adjacentVertices = vertices;
-        this.incomingVertices = incomingVertices;
+        this.incomingVertices = incomingVertices.size();
+        this.gr = gr;
+    }
+
+    public boolean isOdd(){
+        return isOdd;
+    }
+
+    public void setOdd(){
+        isOdd = true;
+    }
+
+    public void clearOdd(){
+        isOdd = false;
     }
 
     /**
@@ -328,18 +353,14 @@ class Node {
         return !adjacentVertices.isEmpty();
     }
 
-    // TODO: 2/16/18 change these to to have a updateOddVertices boolean to change the oddVertices data structures
     public void removeFirstAdjacent(){
         if(!adjacentVertices.isEmpty()){
             adjacentVertices.remove(0);
         }
     }
 
-    public void removeIncomingVertexByVertexNumber(int vertexNumber){
-        int index = incomingVertices.indexOf(vertexNumber);
-        if(index!=-1){
-            incomingVertices.remove(index);
-        }
+    public void removeIncomingVertex(){
+        incomingVertices--;
     }
 
     /**
@@ -379,15 +400,25 @@ class Node {
     }
 
     public void addIncomingVertex(Integer i){
-        incomingVertices.add(i);
+        incomingVertices++;
+    }
+
+    public void updateOdd(){
+        if (checkisEven()) {
+            isOdd = false;
+            gr.removeOddVertex(vertex);
+        } else {
+            isOdd = true;
+            gr.addOddVertex(vertex);
+        }
     }
 
     /**
      *
      * @return true if in==out, false if not
      */
-    public boolean isEven(){
-        return incomingVertices.size()==adjacentVertices.size();
+    private boolean checkisEven(){
+         return incomingVertices==adjacentVertices.size();
     }
 }
 
