@@ -277,7 +277,7 @@ class Graph  extends ArrayList<Node>{
     }
 
     public Integer[] getOddVertices(){
-        return (Integer[])oddVertices.toArray();
+        return oddVertices.toArray(new Integer[oddVertices.size()]);
     }
 
     public void addSelfLoop(int n){
