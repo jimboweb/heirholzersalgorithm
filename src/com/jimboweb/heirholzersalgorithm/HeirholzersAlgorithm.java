@@ -4,7 +4,6 @@ package com.jimboweb.heirholzersalgorithm;
 import java.io.IOException;
 import java.util.*;
 
-// TODO: 2/16/18 get rid of the oddVertices loop.
 
 public class HeirholzersAlgorithm {
 
@@ -157,26 +156,10 @@ public class HeirholzersAlgorithm {
     public  Path makeNewPath(Graph graph, Path path, Integer currentVertex){
         Path newPath = new Path(graph.size());
         while(currentVertex!=null){
-            Integer currentVertexNum = currentVertex;
-            newPath.add(currentVertexNum);
-            Node currentNode = graph.get(currentVertexNum);
-            while(currentNode.hasSelfLoops()){
-                newPath.add(currentVertexNum);
-                graph.removeSelfLoop(currentVertexNum);
-            }
+            Node currentNode = addCurrentVertexAndSelfLoops(graph, currentVertex, newPath);
             boolean isFirstLoop = true;
             if(currentNode.hasAdjacent()){
-                Integer nextVertex = currentNode.getFirstAdjacent();
-                currentNode.removeFirstAdjacent();
-                //this should only update at the beginning and end of path
-                //which should be the only place I can get an odd vertex
-                //but we'll ee
-                if(isFirstLoop || !currentNode.hasAdjacent()){
-                    currentNode.updateOdd();
-                }
-                graph.getNode(nextVertex).removeIncomingVertex();
-                currentVertex=nextVertex;
-
+                currentVertex = getNextVertex(graph, currentNode, isFirstLoop);
                 isFirstLoop = false;
             } else {
                 currentVertex = null;
@@ -184,6 +167,55 @@ public class HeirholzersAlgorithm {
         }
         return newPath;
 
+    }
+
+    /**
+     * Gets the current Node and adds it to the path. Also adds all the
+     * self-loops.
+     * @param graph the graph
+     * @param currentVertex the current vertex number
+     * @param newPath the new path we're creating
+     * @return
+     */
+    private Node addCurrentVertexAndSelfLoops(Graph graph, Integer currentVertex, Path newPath) {
+        Integer currentVertexNum = currentVertex;
+        newPath.add(currentVertexNum);
+        Node currentNode = graph.get(currentVertexNum);
+        while(currentNode.hasSelfLoops()){
+            newPath.add(currentVertexNum);
+            graph.removeSelfLoop(currentVertexNum);
+        }
+        return currentNode;
+    }
+
+    /**
+     * gets the next vertex, removes the incoming and outgoing vertices from the
+     * nodes, and updates the isOdd properties
+     * @param graph the graph
+     * @param currentNode the current node in the loop
+     * @param isFirstLoop boolean used by updateFirstAndLastOddNode method
+     * @return
+     */
+    private Integer getNextVertex(Graph graph, Node currentNode, boolean isFirstLoop) {
+        Integer currentVertex;
+        Integer nextVertex = currentNode.getFirstAdjacent();
+        currentNode.removeFirstAdjacent();
+        updateFirstAndLastOddNode(currentNode, isFirstLoop);
+        graph.getNode(nextVertex).removeIncomingVertex();
+        currentVertex=nextVertex;
+        return currentVertex;
+    }
+
+    /**
+     * this will updated the isOdd property of the first and last nodes of a path
+     * if it's semi-Eulerian and also check again if it's currently odd
+     * @param currentNode
+     * @param isFirstLoop
+     */
+    private void updateFirstAndLastOddNode(Node currentNode, boolean isFirstLoop) {
+        if(isFirstLoop || !currentNode.hasAdjacent() || currentNode.isOdd()){
+            currentNode.updateOdd();
+        }
     }
 
     /**
