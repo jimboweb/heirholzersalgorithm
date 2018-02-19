@@ -1,4 +1,4 @@
-package com.jimboweb.heirholzersalgorithm;
+//package com.jimboweb.heirholzersalgorithm;
 
 
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class HeirholzersAlgorithm {
                 g.addEdge(from, to);
             }
         }
-        for(Node node:g){
+        for(Node node:g.getNodes()){
             node.updateOdd();
         }
         return g;
@@ -189,7 +189,7 @@ public class HeirholzersAlgorithm {
     private Node addCurrentVertexAndSelfLoops(Graph graph, Integer currentVertex, Path newPath) {
         Integer currentVertexNum = currentVertex;
         newPath.add(currentVertexNum);
-        Node currentNode = graph.get(currentVertexNum);
+        Node currentNode = graph.getNode(currentVertexNum);
         while(currentNode.hasSelfLoops()){
             newPath.add(currentVertexNum);
             graph.removeSelfLoop(currentVertexNum);
@@ -211,6 +211,7 @@ public class HeirholzersAlgorithm {
         currentNode.removeFirstAdjacent();
         updateFirstAndLastOddNode(currentNode, isFirstLoop);
         graph.getNode(nextVertex).removeIncomingVertex();
+        updateFirstAndLastOddNode(graph.getNode(nextVertex), isFirstLoop);
         currentVertex=nextVertex;
         return currentVertex;
     }
@@ -257,18 +258,28 @@ public class HeirholzersAlgorithm {
 /**
  * List of Nodes
   */
-class Graph  extends ArrayList<Node>{
-
+class Graph{
+    private ArrayList<Node> nodes;
     Set<Integer> oddVertices;
     public Graph(){
         oddVertices = new HashSet<>();
+        nodes = new ArrayList<>();
     }
+
+    public ArrayList<Node> getNodes() {
+        return nodes;
+    }
+
     /**
      * get Node of index as optional
      * @param n index to get
      * @return Node or Optional.empty if it's not there
      */
 
+
+    public int size(){
+        return nodes.size();
+    }
     public void addOddVertex(int n){
         oddVertices.add(n);
     }
@@ -298,16 +309,15 @@ class Graph  extends ArrayList<Node>{
     }
 
     public void addNode(Node n){
-        this.add(n);
+        nodes.add(n);
     }
 
     public Node getNode(int i){
-        return get(i);
+        return nodes.get(i);
     }
 
-    @Override
     public Iterator<Node> iterator() {
-        return super.iterator();
+        return nodes.iterator();
     }
 
 
