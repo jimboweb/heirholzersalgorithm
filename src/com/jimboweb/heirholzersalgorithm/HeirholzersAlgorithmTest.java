@@ -394,10 +394,12 @@ public class HeirholzersAlgorithmTest {
         }
         for(int i=1;i<nodeList.size();i++){
             resultFrom = nodeList.get(i);
-            resultTo = nodeList.get(i%nodeList.size());
+            int resultFromFinal = resultFrom;
+            testFrom = g.nodes.stream().filter(n->n.index==resultFromFinal).findFirst().orElse(new InputNode(-1));
+            resultTo = nodeList.get((i+1)%nodeList.size());
             int resultToFinal = resultTo;
             Optional<Integer> testTo = testFrom.edgesOut.stream().filter(e->g.edges.get(e).toNode==resultToFinal).findFirst();
-            if (!testTo.isPresent() || testTo.get()!=resultTo){
+            if (!testTo.isPresent() || g.edges.get(testTo.get()).toNode!=resultTo){
                 String failString = "Incorrect path at " + i + ". Node " + resultToFinal +
                         " does not connect from node " + resultFrom;
                 failString += "output was " + output;
