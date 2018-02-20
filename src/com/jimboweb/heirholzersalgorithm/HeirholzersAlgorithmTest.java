@@ -24,11 +24,16 @@ import static org.junit.Assert.*;
 public class HeirholzersAlgorithmTest {
     Random rnd = new Random();
 
-    @Test
-    public void testHierholzersAlgorithm() {
+
+    public static void main(String[] args){
+        HeirholzersAlgorithmTest test = new HeirholzersAlgorithmTest();
+        test.graphTimeToProblemSize();
+    }
+
+    public void graphTimeToProblemSize(){
         Map<Integer,Long> timeToProblemSize = new HashMap<>();
         for(int trial = 0;trial<1000;trial++) {
-            int graphSize = rnd.nextInt(1000)+2;
+            int graphSize = rnd.nextInt(10)+2;
             InputGraph g = makeBalancedInputGraph(graphSize);
             String input = createInput(g);
             TestInput inputter = new TestInput(input);
@@ -37,13 +42,12 @@ public class HeirholzersAlgorithmTest {
             long startTime = System.nanoTime();
             h.hierholzersAlgorithm(inputter, outputter);
             long runTime = System.nanoTime() - startTime;
-            testEulerianCycle(outputter.getOutputText(), g, inputter.input, runTime);
+            //testEulerianCycle(outputter.getOutputText(), g, inputter.input, runTime);
             timeToProblemSize.put(g.edges.size(),runTime);
-
-
-//            JFreeChart chart =
-        }
-        test();
+            if(runTime>20000000){
+                System.out.println("extra slow input = \n" + input);
+            }
+            }
         XYSeriesCollection dataset = new XYSeriesCollection();
         XYSeries series = new XYSeries("TimeToProblemSize");
         for(Integer probSize:timeToProblemSize.keySet()){
@@ -58,6 +62,29 @@ public class HeirholzersAlgorithmTest {
             example.setVisible(true);
             int x = 0;
         });
+
+
+    }
+
+    /*@Test*/
+    public void testHierholzersAlgorithm() {
+        for(int trial = 0;trial<10000;trial++) {
+            int graphSize = rnd.nextInt(10)+2;
+            InputGraph g = makeBalancedInputGraph(graphSize);
+            String input = createInput(g);
+            TestInput inputter = new TestInput(input);
+            TestOutput outputter = new TestOutput();
+            HeirholzersAlgorithm h = new HeirholzersAlgorithm();
+            long startTime = System.nanoTime();
+            h.hierholzersAlgorithm(inputter, outputter);
+            long runTime = System.nanoTime() - startTime;
+            long ratio = runTime/g.edges.size();
+            if (runTime>200000){
+                System.out.println("went over time");
+                fail("input = \n" + input);
+            }
+            testEulerianCycle(outputter.getOutputText(), g, inputter.input, runTime);
+        }
     }
 
     public class TestScatterPlot extends JFrame {
@@ -78,17 +105,17 @@ public class HeirholzersAlgorithmTest {
         }
     }
 
-    @org.junit.Test
-    public void findPath() {
-    }
-
-    @org.junit.Test
-    public void findFirstVertex() {
-    }
-
-    @org.junit.Test
-    public void makeNewPath() {
-    }
+//    @org.junit.Test
+//    public void findPath() {
+//    }
+//
+//    @org.junit.Test
+//    public void findFirstVertex() {
+//    }
+//
+//    @org.junit.Test
+//    public void makeNewPath() {
+//    }
 
     private String createInput(InputGraph g){
         String rtrn = g.nodes.size() + " " + g.edges.size() + "\n";
@@ -487,20 +514,6 @@ public class HeirholzersAlgorithmTest {
         System.out.println("Test passed");
     }
 
-    void test()
-    {
-        SwingUtilities.invokeLater(() -> {
-            try
-            {
-                Thread.sleep(1000);
-            }
-            catch (InterruptedException e)
-            {
-                System.out.println("interrupt");
-            }
-            System.out.println("went through");
-        });
-    }
 
     private static int triangular(int n){
         int tri = 0;
