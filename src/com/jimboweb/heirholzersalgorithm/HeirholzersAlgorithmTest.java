@@ -20,8 +20,10 @@ public class HeirholzersAlgorithmTest {
         TestInput inputter = new TestInput(input);
         TestOutput outputter = new TestOutput();
         HeirholzersAlgorithm h = new HeirholzersAlgorithm();
+        long startTime = System.nanoTime();
         h.hierholzersAlgorithm(inputter,outputter);
-        testEulerianCycle(outputter.getOutputText(),g,inputter.input);
+        long runTime = System.nanoTime() - startTime;
+        testEulerianCycle(outputter.getOutputText(),g,inputter.input, runTime);
     }
 
     @org.junit.Test
@@ -369,7 +371,11 @@ public class HeirholzersAlgorithmTest {
      * @param g the original input graph
      * @return true if cycle is Eulerian in InputGraph g
      */
-    private void testEulerianCycle(String output, InputGraph g, String input){
+    private void testEulerianCycle(String output, InputGraph g, String input, long runTime){
+        System.out.println("output:\n" + output);
+        System.out.println("problem size: " + g.edges.size());
+        System.out.println("runtime: " + runTime);
+        System.out.println("ratio: " + (long)g.edges.size()*1000000/runTime);
         if(output.split("\n")[0]=="0"){
             fail("Eulerian path marked as not Eulearian");
         }
@@ -392,7 +398,7 @@ public class HeirholzersAlgorithmTest {
         if(testFrom.index!=resultFrom){
             fail("first node not in graph");
         }
-        for(int i=1;i<nodeList.size();i++){
+        for(int i=0;i<nodeList.size();i++){
             resultFrom = nodeList.get(i);
             int resultFromFinal = resultFrom;
             testFrom = g.nodes.stream().filter(n->n.index==resultFromFinal).findFirst().orElse(new InputNode(-1));
@@ -408,6 +414,7 @@ public class HeirholzersAlgorithmTest {
             }
             int fromFinal = resultFrom;
             int toFinal = resultTo;
+            // FIXME: 2/20/18 right now this won't mark parallel edges because of findFirst
             Optional<InputEdge> nextEdge = g.edges.stream().filter(edge->edge.fromNode == fromFinal && edge.toNode == toFinal).findFirst();
             if(!nextEdge.isPresent()){
                 fail("edge from " + fromFinal + " to " + toFinal + " does not exist");

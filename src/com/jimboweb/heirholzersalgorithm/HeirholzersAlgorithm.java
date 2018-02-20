@@ -4,13 +4,7 @@ package com.jimboweb.heirholzersalgorithm;
 import java.io.IOException;
 import java.util.*;
 
-// TODO: 2/16/18 get rid of the oddVertices loop.
-// 0) give the Graph object an oddVertices list of vertex indices
-// 1) give the Node object a boolean isOdd property
-// 2) replace the incomingEdges list with a simple incomingEdges int count variable
-// 3) set the isOdd and oddVertices array at beginning of program
-// 4) change the removeEdge method so it changes the isOdd, incomingVertices count and oddEdges list
-// but only IF it's not removing another edge right after
+
 
 public class HeirholzersAlgorithm {
 
