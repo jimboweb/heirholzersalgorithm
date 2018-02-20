@@ -5,14 +5,6 @@ import java.io.IOException;
 import java.util.*;
 
 
-// FIXME: 2/18/18 stack overflow on input: 4 5
-//1 3
-//2 3
-//3 4
-//4 2
-//3 1
-// currentVertex isn't going to null after full path is found
-// seems oddVertices isn't correctly being set
 
 public class HeirholzersAlgorithm {
 
