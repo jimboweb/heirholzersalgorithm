@@ -28,6 +28,9 @@ public class HeirholzersAlgorithmTest {
     public static void main(String[] args){
         HeirholzersAlgorithmTest test = new HeirholzersAlgorithmTest();
         test.graphTimeToProblemSize();
+//        test.customInput();
+        //6,9,6,3,3,2,3,4,3,1,1,5,2,3,3,6,4,3,5,3
+        //5,8,1,2,2,1,2,3,3,2,3,4,4,3,4,5,5,4
     }
 
     private void customInput(int... ints){
@@ -36,6 +39,8 @@ public class HeirholzersAlgorithmTest {
             input += ints[i];
             if(i%2==1){
                 input+="\n";
+            } else {
+                input+=" ";
             }
         }
         TestInput inputter = new TestInput(input);
@@ -43,12 +48,13 @@ public class HeirholzersAlgorithmTest {
         HeirholzersAlgorithm h = new HeirholzersAlgorithm();
         long runTime = getRunTime(inputter, outputter, h);
         System.out.println("Output: \n" + outputter.getOutputText());
+        System.out.println("runtime: " + runTime);
     }
 
     public void graphTimeToProblemSize(){
         ArrayList<long[]> timeToProblemSize = new ArrayList<>();
-        for(int trial = 0;trial<1000;trial++) {
-            int graphSize = rnd.nextInt(10)+2;
+        for(int trial = 0;trial<10000;trial++) {
+            int graphSize = rnd.nextInt(50000)+2;
             InputGraph g = makeBalancedInputGraph(graphSize);
             String input = createInput(g);
             TestInput inputter = new TestInput(input);
@@ -57,14 +63,15 @@ public class HeirholzersAlgorithmTest {
             long runTime = getRunTime(inputter, outputter, h);
             //testEulerianCycle(outputter.getOutputText(), g, inputter.input, runTime);
             timeToProblemSize.add(new long[] {g.edges.size(),runTime});
-            if(runTime>20000000){
-                System.out.println("extra slow input = \n" + input);
-                System.out.println("runtime: " + runTime);
-            }
+//            if(runTime>800000 && trial>0){
+//                System.out.println("extra slow input = \n" + input);
+//                System.out.println("runtime: " + runTime);
+//            }
             }
         XYSeriesCollection dataset = new XYSeriesCollection();
         XYSeries series = new XYSeries("TimeToProblemSize");
-        for(long[] probSize:timeToProblemSize){
+        for(int i=1;i<timeToProblemSize.size();i++){
+            long[] probSize = timeToProblemSize.get(i);
             series.add(probSize[0],probSize[1]);
         }
         dataset.addSeries(series);
