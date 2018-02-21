@@ -47,9 +47,9 @@ public class HeirholzersAlgorithm {
     private Graph buildGraph(ArrayList<ArrayList<Integer>> inputs){
         int n = inputs.get(0).get(0);
         int m = inputs.get(0).get(0);
-        Graph g = new Graph();
+        Graph g = new Graph(n);
         for(int i=0;i<n;i++){
-            Node newNode = new Node(i,new ArrayList<>(), new ArrayList<>());
+            Node newNode = new Node(i);
             g.addNode(newNode);
         }
         for(int i=1;i<inputs.size();i++){
@@ -153,18 +153,17 @@ public class HeirholzersAlgorithm {
         while(currentVertex!=null){
             Integer currentVertexNum = currentVertex;
             newPath.add(currentVertexNum);
-            Node currentNode = graph.get(currentVertexNum);
+            Node currentNode = graph.getNode(currentVertexNum);
             while(currentNode.hasSelfLoops()){
                 newPath.add(currentVertexNum);
                 graph.removeSelfLoop(currentVertexNum);
             }
             if(currentNode.hasAdjacent()){
-                Integer nextVertex = currentNode.getFirstAdjacent();
+                Integer nextVertex = currentNode.popFirstAdjacent();
                 // TODO: 2/16/18 for first and last vertices check for oddVertices
                 // probably first vertex can be something like an isFirstVertex boolean
                 // and the last vertex can be found by checking if nextVertex has adjacent
-                currentNode.removeFirstAdjacent();
-                graph.getNode(nextVertex).removeIncomingVertexByVertexNumber(currentNode.getVertex());
+                graph.getNode(nextVertex).removeIncomingVertex();
                 currentVertex=nextVertex;
             } else {
                 currentVertex = null;
@@ -204,16 +203,15 @@ public class HeirholzersAlgorithm {
 /**
  * List of Nodes
   */
-class Graph  extends ArrayList<Node>{
+class Graph  {
 
-    public Graph(){
-
+    ArrayList<Node> nodes;
+    public Graph(int size){
+        nodes = new ArrayList<>(size);
     }
-    /**
-     * get Node of index as optional
-     * @param n index to get
-     * @return Node or Optional.empty if it's not there
-     */
+    public int size(){
+        return nodes.size();
+    }
 
     public void addSelfLoop(int n){
         getNode(n).addSelfLoop();
@@ -224,16 +222,15 @@ class Graph  extends ArrayList<Node>{
     }
 
     public void addNode(Node n){
-        this.add(n);
+        nodes.add(n);
     }
 
     public Node getNode(int i){
-        return get(i);
+        return nodes.get(i);
     }
 
-    @Override
     public Iterator<Node> iterator() {
-        return super.iterator();
+        return nodes.iterator();
     }
 
     // TODO: 2/16/18 We can get rid of this loop. It's worsening the efficiency by a factor of O(n)
@@ -267,8 +264,8 @@ class Graph  extends ArrayList<Node>{
  */
 class Node {
     private final Integer vertex;
-    private List<Integer> adjacentVertices;
-    private List<Integer> incomingVertices;
+    private Stack<Integer> adjacentVertices;
+    private int incomingVertices;
     private int selfLoops = 0;
     /**
      *
@@ -276,19 +273,18 @@ class Node {
      * @param vertices adjacent vertices
      * @param incomingVertices incoming vertices
      */
-    public Node(Integer vertex, List<Integer> vertices, List<Integer> incomingVertices) {
+    public Node(Integer vertex, Stack<Integer> vertices, int incomingVertices) {
         this.vertex = vertex;
         this.adjacentVertices = vertices;
         this.incomingVertices = incomingVertices;
     }
 
-    /**
-     * constructor with just the vertex
-     * @param vertex the vertex number
-     */
     public Node(Integer vertex){
         this.vertex = vertex;
+        this.adjacentVertices = new Stack<>();
+        this.incomingVertices = 0;
     }
+
 
     public boolean hasSelfLoops(){
         return selfLoops>0;
@@ -318,27 +314,17 @@ class Node {
         return !adjacentVertices.isEmpty();
     }
 
-    // TODO: 2/16/18 change these to to have a updateOddVertices boolean to change the oddVertices data structures
-    public void removeFirstAdjacent(){
-        if(!adjacentVertices.isEmpty()){
-            adjacentVertices.remove(0);
-        }
-    }
-
-    public void removeIncomingVertexByVertexNumber(int vertexNumber){
-        int index = incomingVertices.indexOf(vertexNumber);
-        if(index!=-1){
-            incomingVertices.remove(index);
-        }
+    public void removeIncomingVertex(){
+        incomingVertices--;
     }
 
     /**
      *
      * @return first adjacent vertex
      */
-    public Integer getFirstAdjacent() {
+    public Integer popFirstAdjacent() {
         if(hasAdjacent()) {
-            return adjacentVertices.get(0);
+            return adjacentVertices.pop();
         } else {
             return null;
         }
@@ -369,7 +355,7 @@ class Node {
     }
 
     public void addIncomingVertex(Integer i){
-        incomingVertices.add(i);
+        incomingVertices++;
     }
 
     /**
@@ -377,7 +363,7 @@ class Node {
      * @return true if in==out, false if not
      */
     public boolean isEven(){
-        return incomingVertices.size()==adjacentVertices.size();
+        return incomingVertices==adjacentVertices.size();
     }
 }
 

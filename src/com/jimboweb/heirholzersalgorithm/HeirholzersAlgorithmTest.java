@@ -28,8 +28,8 @@ public class HeirholzersAlgorithmTest {
     public static void main(String[] args){
         HeirholzersAlgorithmTest test = new HeirholzersAlgorithmTest();
         test.graphTimeToProblemSize();
-//        test.customInput();
-        //6,9,6,3,3,2,3,4,3,1,1,5,2,3,3,6,4,3,5,3
+        //test.customInput(6,9,6,3,3,2,3,4,3,1,1,5,2,3,3,6,4,3,5,3);
+        //
         //5,8,1,2,2,1,2,3,3,2,3,4,4,3,4,5,5,4
     }
 
@@ -53,8 +53,8 @@ public class HeirholzersAlgorithmTest {
 
     public void graphTimeToProblemSize(){
         ArrayList<long[]> timeToProblemSize = new ArrayList<>();
-        for(int trial = 0;trial<10000;trial++) {
-            int graphSize = rnd.nextInt(50000)+2;
+        for(int trial = 0;trial<1000;trial++) {
+            int graphSize = rnd.nextInt(1000)+2;
             InputGraph g = makeBalancedInputGraph(graphSize);
             String input = createInput(g);
             TestInput inputter = new TestInput(input);
