@@ -30,8 +30,23 @@ public class HeirholzersAlgorithmTest {
         test.graphTimeToProblemSize();
     }
 
+    private void customInput(int... ints){
+        String input = "";
+        for(int i=0;i<ints.length;i++){
+            input += ints[i];
+            if(i%2==1){
+                input+="\n";
+            }
+        }
+        TestInput inputter = new TestInput(input);
+        TestOutput outputter = new TestOutput();
+        HeirholzersAlgorithm h = new HeirholzersAlgorithm();
+        long runTime = getRunTime(inputter, outputter, h);
+        System.out.println("Output: \n" + outputter.getOutputText());
+    }
+
     public void graphTimeToProblemSize(){
-        Map<Integer,Long> timeToProblemSize = new HashMap<>();
+        ArrayList<long[]> timeToProblemSize = new ArrayList<>();
         for(int trial = 0;trial<1000;trial++) {
             int graphSize = rnd.nextInt(10)+2;
             InputGraph g = makeBalancedInputGraph(graphSize);
@@ -39,19 +54,18 @@ public class HeirholzersAlgorithmTest {
             TestInput inputter = new TestInput(input);
             TestOutput outputter = new TestOutput();
             HeirholzersAlgorithm h = new HeirholzersAlgorithm();
-            long startTime = System.nanoTime();
-            h.hierholzersAlgorithm(inputter, outputter);
-            long runTime = System.nanoTime() - startTime;
+            long runTime = getRunTime(inputter, outputter, h);
             //testEulerianCycle(outputter.getOutputText(), g, inputter.input, runTime);
-            timeToProblemSize.put(g.edges.size(),runTime);
+            timeToProblemSize.add(new long[] {g.edges.size(),runTime});
             if(runTime>20000000){
                 System.out.println("extra slow input = \n" + input);
+                System.out.println("runtime: " + runTime);
             }
             }
         XYSeriesCollection dataset = new XYSeriesCollection();
         XYSeries series = new XYSeries("TimeToProblemSize");
-        for(Integer probSize:timeToProblemSize.keySet()){
-            series.add(probSize,timeToProblemSize.get(probSize));
+        for(long[] probSize:timeToProblemSize){
+            series.add(probSize[0],probSize[1]);
         }
         dataset.addSeries(series);
         SwingUtilities.invokeLater(() -> {
@@ -66,6 +80,12 @@ public class HeirholzersAlgorithmTest {
 
     }
 
+    private long getRunTime(TestInput inputter, TestOutput outputter, HeirholzersAlgorithm h) {
+        long startTime = System.nanoTime();
+        h.hierholzersAlgorithm(inputter, outputter);
+        return System.nanoTime() - startTime;
+    }
+
     /*@Test*/
     public void testHierholzersAlgorithm() {
         for(int trial = 0;trial<10000;trial++) {
@@ -75,9 +95,7 @@ public class HeirholzersAlgorithmTest {
             TestInput inputter = new TestInput(input);
             TestOutput outputter = new TestOutput();
             HeirholzersAlgorithm h = new HeirholzersAlgorithm();
-            long startTime = System.nanoTime();
-            h.hierholzersAlgorithm(inputter, outputter);
-            long runTime = System.nanoTime() - startTime;
+            long runTime = getRunTime(inputter, outputter, h);
             long ratio = runTime/g.edges.size();
             if (runTime>200000){
                 System.out.println("went over time");

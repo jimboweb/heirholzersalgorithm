@@ -9,15 +9,11 @@ import java.util.*;
 public class HeirholzersAlgorithm {
 
     public static void main(String[] args) {
-        new Thread(null, new Runnable() {
-            public void run() {
-                try {
-                    new HeirholzersAlgorithm().run();
-                } catch (IOException ex) {
-                    System.out.println(ex);
-                }
-            }
-        }, "1", 1 << 26).start();
+        try {
+            new HeirholzersAlgorithm().run();
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
     }
     public void run() throws IOException {
         Inputter inputter = new ConsoleInput();
