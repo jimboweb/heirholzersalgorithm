@@ -54,15 +54,21 @@ public class HeirholzersAlgorithmTest {
     public void graphTimeToProblemSize(){
         ArrayList<long[]> timeToProblemSize = new ArrayList<>();
         for(int trial = 0;trial<1000;trial++) {
-            int graphSize = rnd.nextInt(1000)+2;
+            int graphSize = rnd.nextInt(5000)+2;
             InputGraph g = makeBalancedInputGraph(graphSize);
             String input = createInput(g);
             TestInput inputter = new TestInput(input);
             TestOutput outputter = new TestOutput();
             HeirholzersAlgorithm h = new HeirholzersAlgorithm();
-            long runTime = getRunTime(inputter, outputter, h);
-            //testEulerianCycle(outputter.getOutputText(), g, inputter.input, runTime);
-            timeToProblemSize.add(new long[] {g.edges.size(),runTime});
+            int overtimeCount = 0;
+            for(int i=0;i<2;i++) {
+                long runTime = getRunTime(inputter, outputter, h);
+                //testEulerianCycle(outputter.getOutputText(), g, inputter.input, runTime);
+                timeToProblemSize.add(new long[]{g.edges.size(), runTime});
+                if(runTime/g.edges.size()>1000){
+                    overtimeCount++;
+                }
+            }
 //            if(runTime>800000 && trial>0){
 //                System.out.println("extra slow input = \n" + input);
 //                System.out.println("runtime: " + runTime);

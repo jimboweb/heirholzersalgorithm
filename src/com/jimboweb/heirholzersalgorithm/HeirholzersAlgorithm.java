@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.*;
 
 
-
 public class HeirholzersAlgorithm {
 
     public static void main(String[] args) {
@@ -28,8 +27,10 @@ public class HeirholzersAlgorithm {
         if(graph.isGraphEven(graph.size())){
             path = findPath(graph, path);
             String output = "1\n";
-            for(int i=0;i<path.size()-1;i++){
-                int outputNode = path.get(i) + 1;
+            Queue<Integer> pathQueue = path.getQueue();
+            while(pathQueue.size()>1){
+                int outputNode = pathQueue.poll();
+                outputNode++;
                 output += outputNode + " ";
             }
             outputter.output(output);
@@ -183,11 +184,10 @@ public class HeirholzersAlgorithm {
         Path adjustedPath = new Path(path.getGraphSize());
         boolean newPathNotAdded = true;
         Integer start = newPath.getStart();
-        for(Integer vertex:path){
+        for(Integer vertex:path.getQueue()){
             adjustedPath.add(vertex);
             if(newPathNotAdded && vertex.equals(start)){
-                for(int j=1;j<newPath.size();j++){
-                    Integer newVertex = newPath.get(j);
+                for(int newVertex:newPath.getQueue()){
                     adjustedPath.add(newVertex);
                 }
                 newPathNotAdded = false;
@@ -233,9 +233,8 @@ class Graph  {
         return nodes.iterator();
     }
 
-    // TODO: 2/16/18 We can get rid of this loop. It's worsening the efficiency by a factor of O(n)
-    public  Path oddVertices(int graphSize){
-        Path rtrn = new Path(graphSize);
+    public  ArrayList<Integer> oddVertices(int graphSize){
+        ArrayList<Integer> rtrn = new ArrayList<>(graphSize);
         Iterator<Node> graphIterator = (Iterator<Node>)iterator();
         while (graphIterator.hasNext()){
             Node n = graphIterator.next();
@@ -247,7 +246,7 @@ class Graph  {
     }
 
     public boolean isGraphEven(int graphSize){
-        Path oddVertices = oddVertices(graphSize); //graph size doesn't matter here
+        ArrayList<Integer> oddVertices = oddVertices(graphSize);
         return oddVertices.isEmpty();
     }
 
@@ -264,7 +263,7 @@ class Graph  {
  */
 class Node {
     private final Integer vertex;
-    private Stack<Integer> adjacentVertices;
+    private Deque<Integer> adjacentVertices;
     private int incomingVertices;
     private int selfLoops = 0;
     /**
@@ -273,7 +272,7 @@ class Node {
      * @param vertices adjacent vertices
      * @param incomingVertices incoming vertices
      */
-    public Node(Integer vertex, Stack<Integer> vertices, int incomingVertices) {
+    public Node(Integer vertex, Deque<Integer> vertices, int incomingVertices) {
         this.vertex = vertex;
         this.adjacentVertices = vertices;
         this.incomingVertices = incomingVertices;
@@ -281,7 +280,7 @@ class Node {
 
     public Node(Integer vertex){
         this.vertex = vertex;
-        this.adjacentVertices = new Stack<>();
+        this.adjacentVertices = new ArrayDeque<>();
         this.incomingVertices = 0;
     }
 
@@ -335,23 +334,9 @@ class Node {
      * @param i index of adjacent vertex
      * @return vertex number of adjacent vertex
      */
-    public Integer getAdjacentVertex (int i){
-        if(adjacentVertices.size()>=i) {
-            return null;
-        }
-        return adjacentVertices.get(i);
-    }
-
-    /**
-     * removes vertex of index
-     * @param i index to remove
-     */
-    public void removeAdjacentVertex(int i) {
-        adjacentVertices.remove(i);
-    }
 
     public void addAdjacentVertex(Integer i){
-        adjacentVertices.add(i);
+        adjacentVertices.push(i);
     }
 
     public void addIncomingVertex(Integer i){
@@ -370,13 +355,31 @@ class Node {
 /**
  * ArrayList of vertex numbers, will be final return of findPath method
  */
-class Path extends ArrayList<Integer>{
+class Path {
+    private Queue<Integer> queue;
     private boolean[] doesContain;
     private Integer val;
 
-    @Override
+
+    public int size(){
+        return queue.size();
+    }
+
+    public boolean isEmpty(){
+        return queue.isEmpty();
+    }
+
+    public Queue<Integer> getQueue() {
+        return queue;
+    }
+
+    public Path(int size) {
+        doesContain = new boolean[size];
+        queue = new LinkedList<>();
+    }
+
     public boolean add(Integer val){
-        boolean rtrn = super.add(val);
+        boolean rtrn = queue.add(val);
         int valInt = (int)val;
         if(valInt>doesContain.length){
             throw new IndexOutOfBoundsException("contains array is not big enough for " + val);
@@ -393,23 +396,16 @@ class Path extends ArrayList<Integer>{
         return doesContain[valInt];
     }
 
-    public Path(Integer size) {
-        doesContain = new boolean[size];
-    }
-
-    public Path(int size) {
-        doesContain = new boolean[size];
-    }
 
     /**
      *
      * @return first vertex or Optional.empty if path is empty
      */
     public Integer getStart(){
-        if(isEmpty()){
+        if(queue.isEmpty()){
             return null;
         } else {
-            return super.get(0);
+            return queue.poll();
         }
     }
 
