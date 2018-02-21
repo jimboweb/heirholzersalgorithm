@@ -9,15 +9,11 @@ import java.util.*;
 public class HeirholzersAlgorithm {
 
     public static void main(String[] args) {
-        new Thread(null, new Runnable() {
-            public void run() {
-                try {
-                    new HeirholzersAlgorithm().run();
-                } catch (IOException ex) {
-                    System.out.println(ex);
-                }
-            }
-        }, "1", 1 << 26).start();
+        try {
+            new HeirholzersAlgorithm().run();
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
     }
     public void run() throws IOException {
         Inputter inputter = new ConsoleInput();
@@ -262,11 +258,6 @@ class Graph{
         return nodes;
     }
 
-    /**
-     * get Node of index as optional
-     * @param n index to get
-     * @return Node or Optional.empty if it's not there
-     */
 
 
     public int size(){
