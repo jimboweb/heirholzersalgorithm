@@ -4,15 +4,12 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.junit.Test;
+
 import java.awt.Color;
-import java.awt.event.WindowEvent;
 
 import javax.swing.*;
-import java.awt.event.WindowAdapter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,34 +43,37 @@ public class HeirholzersAlgorithmTest {
         TestInput inputter = new TestInput(input);
         TestOutput outputter = new TestOutput();
         HeirholzersAlgorithm h = new HeirholzersAlgorithm();
-        long runTime = getRunTime(inputter, outputter, h);
+        long runTime = getLoopCount(inputter, outputter, h);
         System.out.println("Output: \n" + outputter.getOutputText());
         System.out.println("runtime: " + runTime);
     }
 
     public void graphTimeToProblemSize(){
         ArrayList<long[]> timeToProblemSize = new ArrayList<>();
-        for(int trial = 0;trial<1000;trial++) {
-            int graphSize = rnd.nextInt(5000)+2;
+        for(int trial = 0;trial<10000;trial++) {
+            int graphSize = rnd.nextInt(2000)+2;
             InputGraph g = makeBalancedInputGraph(graphSize);
             String input = createInput(g);
             TestInput inputter = new TestInput(input);
             TestOutput outputter = new TestOutput();
             HeirholzersAlgorithm h = new HeirholzersAlgorithm();
             int overtimeCount = 0;
+            int loopCount = 0;
             for(int i=0;i<2;i++) {
-                long runTime = getRunTime(inputter, outputter, h);
-                //testEulerianCycle(outputter.getOutputText(), g, inputter.input, runTime);
-                timeToProblemSize.add(new long[]{g.edges.size(), runTime});
-                if(runTime/g.edges.size()>1000){
+                loopCount = getLoopCount(inputter, outputter, h);
+                //testEulerianCycle(outputter.getOutputText(), g, inputter.input, loopCount);
+                timeToProblemSize.add(new long[]{g.edges.size(), loopCount});
+                int ratio = (int)loopCount/g.edges.size();
+                System.out.println("trial = " + trial + " ratio = " + ratio + " size = " + g.edges.size());
+                if(ratio>5000 ){
                     overtimeCount++;
                 }
             }
-//            if(runTime>800000 && trial>0){
-//                System.out.println("extra slow input = \n" + input);
-//                System.out.println("runtime: " + runTime);
-//            }
+            if(overtimeCount>1 && trial>200){
+                System.out.println("extra slow input = \n" + input);
+                System.out.println("runtime: " + loopCount);
             }
+        }
         XYSeriesCollection dataset = new XYSeriesCollection();
         XYSeries series = new XYSeries("TimeToProblemSize");
         for(int i=1;i<timeToProblemSize.size();i++){
@@ -82,7 +82,7 @@ public class HeirholzersAlgorithmTest {
         }
         dataset.addSeries(series);
         SwingUtilities.invokeLater(() -> {
-            TestScatterPlot example = new TestScatterPlot("",dataset);
+            TestScatterPlot example = new TestScatterPlot("Loop Count to Problem Size",dataset);
             example.setSize(800, 400);
             example.setLocationRelativeTo(null);
             example.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -93,10 +93,11 @@ public class HeirholzersAlgorithmTest {
 
     }
 
-    private long getRunTime(TestInput inputter, TestOutput outputter, HeirholzersAlgorithm h) {
-        long startTime = System.nanoTime();
+    private int getLoopCount(TestInput inputter, TestOutput outputter, HeirholzersAlgorithm h) {
+        //long startTime = System.nanoTime();
         h.hierholzersAlgorithm(inputter, outputter);
-        return System.nanoTime() - startTime;
+        //return System.nanoTime() - startTime;
+        return h.getOperations();
     }
 
     /*@Test*/
@@ -108,7 +109,7 @@ public class HeirholzersAlgorithmTest {
             TestInput inputter = new TestInput(input);
             TestOutput outputter = new TestOutput();
             HeirholzersAlgorithm h = new HeirholzersAlgorithm();
-            long runTime = getRunTime(inputter, outputter, h);
+            long runTime = getLoopCount(inputter, outputter, h);
             long ratio = runTime/g.edges.size();
             if (runTime>200000){
                 System.out.println("went over time");
@@ -122,7 +123,7 @@ public class HeirholzersAlgorithmTest {
         public TestScatterPlot(String title, XYSeriesCollection dataset){
             super(title);
             JFreeChart chart = ChartFactory.createScatterPlot(
-                    "Time to problem size",
+                    "Operations to problem size",
                     "problem size",
                     "time",
                     dataset);

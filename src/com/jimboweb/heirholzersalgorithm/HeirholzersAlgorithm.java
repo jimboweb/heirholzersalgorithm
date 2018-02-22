@@ -6,6 +6,12 @@ import java.util.*;
 
 
 public class HeirholzersAlgorithm {
+    boolean countLoops = false;
+    private int operations = 0;//debug
+
+    public int getOperations() {//debug
+        return operations;
+    }
 
     public static void main(String[] args) {
         try {
@@ -32,12 +38,14 @@ public class HeirholzersAlgorithm {
                 int outputNode = pathQueue.poll();
                 outputNode++;
                 output += outputNode + " ";
+                if(countLoops) operations++; //debug
             }
             outputter.output(output);
         } else {
             outputter.output("0");
         }
-
+        if(countLoops) operations +=graph.getOperations();
+        if(countLoops) graph.clearLoopCount();
     }
 
     /**
@@ -52,6 +60,8 @@ public class HeirholzersAlgorithm {
         for(int i=0;i<n;i++){
             Node newNode = new Node(i);
             g.addNode(newNode);
+            if(countLoops) operations++; //debug
+
         }
         for(int i=1;i<inputs.size();i++){
             int from = inputs.get(i).get(0)-1;
@@ -61,6 +71,8 @@ public class HeirholzersAlgorithm {
             }else {
                 g.addEdge(from, to);
             }
+            if(countLoops) operations++; //debug
+
         }
         return g;
     }
@@ -82,6 +94,8 @@ public class HeirholzersAlgorithm {
             path = addNewPath(path, newPath);
         }
         path = findPath(graph,path);
+        if(countLoops) operations++; //debug
+
         return path;
     }
 
@@ -100,6 +114,8 @@ public class HeirholzersAlgorithm {
         } else {
             currentVertex = firstVertexIfEulerian(graph,path);
         }
+        if(countLoops) operations++; //debug
+
         return currentVertex;
     }
 
@@ -119,6 +135,8 @@ public class HeirholzersAlgorithm {
                     currentVertex = n.getVertex();
                 }
             }
+            if(countLoops) operations++; //debug
+
         }
         return currentVertex;
     }
@@ -138,6 +156,8 @@ public class HeirholzersAlgorithm {
         } else if(path.doesContain(secondEndpoint)){
             currentVertex = secondEndpoint;
         }
+        if(countLoops) operations++; //debug
+
         return currentVertex;
     }
 
@@ -155,15 +175,16 @@ public class HeirholzersAlgorithm {
             Integer currentVertexNum = currentVertex;
             newPath.add(currentVertexNum);
             Node currentNode = graph.getNode(currentVertexNum);
+            if(countLoops) operations++; //debug
+
             while(currentNode.hasSelfLoops()){
                 newPath.add(currentVertexNum);
                 graph.removeSelfLoop(currentVertexNum);
+                if(countLoops) operations++; //debug
+
             }
             if(currentNode.hasAdjacent()){
                 Integer nextVertex = currentNode.popFirstAdjacent();
-                // TODO: 2/16/18 for first and last vertices check for oddVertices
-                // probably first vertex can be something like an isFirstVertex boolean
-                // and the last vertex can be found by checking if nextVertex has adjacent
                 graph.getNode(nextVertex).removeIncomingVertex();
                 currentVertex=nextVertex;
             } else {
@@ -192,6 +213,8 @@ public class HeirholzersAlgorithm {
                 }
                 newPathNotAdded = false;
             }
+            if(countLoops) operations++; //debug
+
         }
         path = adjustedPath;
         return path;
@@ -204,6 +227,15 @@ public class HeirholzersAlgorithm {
  * List of Nodes
   */
 class Graph  {
+    private int operations;//debug
+    boolean countLoops = false;
+
+    public int getOperations() {//debug
+        return operations;
+    }
+    public void clearLoopCount(){
+        operations =0;
+    }
 
     ArrayList<Node> nodes;
     public Graph(int size){
@@ -241,6 +273,7 @@ class Graph  {
             if(!n.isEven()){
                 rtrn.add((Integer)n.getVertex());
             }
+            if(countLoops) operations++;
         }
         return rtrn;
     }
@@ -436,6 +469,7 @@ class ConsoleInput implements Inputter {
             in.add(scanner.nextInt());
             in.add(scanner.nextInt());
             inputs.add(in);
+
         }
         return inputs;
     }
