@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
-// TODO: 2/14/18 make sure test works. then make a timer and see how time increases as problem size increases.
 
 public class HeirholzersAlgorithmTest {
     Random rnd = new Random();
