@@ -6,6 +6,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.junit.Test;
 
 import java.awt.Color;
 
@@ -100,10 +101,10 @@ public class HeirholzersAlgorithmTest {
         return h.getOperations();
     }
 
-    /*@Test*/
+    @Test
     public void testHierholzersAlgorithm() {
-        for(int trial = 0;trial<10000;trial++) {
-            int graphSize = rnd.nextInt(10)+2;
+        for(int trial = 0;trial<100;trial++) {
+            int graphSize = rnd.nextInt(1000)+2;
             InputGraph g = makeBalancedInputGraph(graphSize);
             String input = createInput(g);
             TestInput inputter = new TestInput(input);
